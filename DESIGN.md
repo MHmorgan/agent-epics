@@ -41,9 +41,6 @@ is an Obsidian-CLI like interface (not POSIX compatible).
 
 One SQLite file per epic. Each DB uses the `user_version` PRAGMA and migrates on open.
 
-**Retirement:** mark the epic's root task `done` or `abandoned` (the default
-listing filters them out). Delete the file manually with `rm` when ready.
-
 ---
 
 ## Data model
@@ -140,7 +137,7 @@ Only leaves have status. Branches derive.
 ### Transitions (agent-driven only)
 
 ```
-pending   → active | blocked | abandoned
+pending   → active | blocked | abandoned | (split)
 active    → blocked | done | abandoned
 blocked   → active | abandoned | (split)
 done      → (terminal)
@@ -208,13 +205,16 @@ appending parents and siblings.
 
   ```
   # my-epic — context
-  <context of my-epic>
+  <context of epic my-epic>
 
   # my-epic:2 — context
-  <context of my-epic:2>
+  <context of parent my-epic:2>
 
   # my-epic:2:1 — context
-  <context of my-epic:2:1>
+  <context of sibling my-epic:2:1>
+
+  # my-epic:2:2 — context
+  <context of my-epic:2:2>
   ```
 
   Empty pieces are omitted. The composition includes the requested task itself
@@ -278,7 +278,7 @@ has happened. Not a general restructuring mechanism.
 - Siblings run in parallel by default.
 - `ae task after <id> <pred>` creates an ordering edge.
 - `ae task unafter <id> <pred>` removes it.
-- Both IDs within the same epic. Cycles rejected at insert.
+- Both IDs within the same epic and siblings. Cycles rejected at insert.
 
 ### Target semantics
 
@@ -340,27 +340,29 @@ All task commands uses json output for machine readability.
 ### Human interface
 
 ```
-ae epics  
+ae epics          # List all epics (root tasks)
+ae rm <epic>      # Remove the epic
+ae purge          # Remove all terminal epics (done or abandoned)
 ```
 
 ### Listing and reading
 
 ```
-ae task list                        # epics (root tasks); terminal hidden
+ae task list                        # all tasks with a non-terminal status
 ae task list all                    # include done/abandoned tasks
 ae task list parent=<id>            # immediate children of a branch
 ae task get <id>                    # body (markdown)
 ae task context get <id>            # composed context
 ae task records <id>                # subtree records (default)
 ae task records <id> self           # exact task only
-ae task next <epic>                 # first ready pending leaf (prints markdown of concatenated context and body)
+ae task next <epic>                 # first ready pending leaf
 ```
 
 ### Creation and planning
 
 ```
-ae task new <id>                    # creates epic (top-level) or child
-                                    # parent (if any) must exist
+ae task new-epic <epic>             # creates epic (top-level)
+ae task add-child <parent>          # create a new child for the given parent task (must be a branch)
 ae task set <id> <markdown>         # replaces body; leaf only
 ae task context set <id> <markdown> # replaces context; any task
 ae task record  <id> <text>         # appends agent record
@@ -388,8 +390,8 @@ ae task abandon  <id> <reason>      # → abandoned
 ### Epic attributes
 
 ```
-ae attr set <epic> <attr> <value>   # sets/updates summary
-ae attr get <epic> <attr>           # requires summary + all leaves terminal
+ae attr set <epic> <attr> <value>   # set an epic attribute
+ae attr get <epic> <attr>           # get the content of an epic attribute
 ```
 
 ---
@@ -400,8 +402,6 @@ Enforced by the tool on every write:
 
 - A task's `status` is NULL iff the task has children.
 - A task's body is immutable iff the task has children.
-- `done` on an epic requires non-NULL summary and all descendant leaves
-  terminal.
 - Records are append-only; no UPDATE, no DELETE.
 - `split` requires a leaf, status ∈ {pending, blocked}, and ≥ 1 `---` in
   the body.
@@ -468,5 +468,3 @@ summary.
 - Non-ASCII slugs.
 - Reopening from terminal states. If needed later: `ae task reopen <id>`.
 - Bulk operations like `ae task sequence a b c d`. Sugar for later.
-- Context composition strategies beyond ancestors-first (e.g., including
-  sibling outcomes, filtered composition).
