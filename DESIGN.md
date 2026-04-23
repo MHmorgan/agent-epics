@@ -32,7 +32,7 @@ is an Obsidian-CLI like interface (not POSIX compatible).
 ## Storage
 
 ```
-~/.agent-epic/
+~/.agent-epics/
 └── epics/
     ├── my-project.db
     ├── another-epic.db
