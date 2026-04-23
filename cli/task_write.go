@@ -59,11 +59,14 @@ func registerAddChildCmd(ctx context.Context) {
 
 func registerSetBodyCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
-	var rawID, markdown string
+	var rawID string
 	cmd := app.SubCommand("task:set-body", "Set task body")
 	cmd.StringArg(&rawID, "id", "Task ID")
-	cmd.StringArg(&markdown, "markdown", "Body text")
 	cmd.Run(func() error {
+		text, err := readStdin()
+		if err != nil {
+			return jsonError(err)
+		}
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
 			return jsonError(err)
@@ -74,7 +77,7 @@ func registerSetBodyCmd(ctx context.Context) {
 		}
 		defer conn.Close()
 
-		if err := epic.SetTaskBody(ctx, conn, q, taskID, markdown); err != nil {
+		if err := epic.SetTaskBody(ctx, conn, q, taskID, text); err != nil {
 			return jsonError(err)
 		}
 		fmt.Println(jsonSuccess(nil))
@@ -84,11 +87,14 @@ func registerSetBodyCmd(ctx context.Context) {
 
 func registerSetContextCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
-	var rawID, markdown string
+	var rawID string
 	cmd := app.SubCommand("task:set-context", "Set task context")
 	cmd.StringArg(&rawID, "id", "Task ID")
-	cmd.StringArg(&markdown, "markdown", "Context text")
 	cmd.Run(func() error {
+		text, err := readStdin()
+		if err != nil {
+			return jsonError(err)
+		}
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
 			return jsonError(err)
@@ -99,7 +105,7 @@ func registerSetContextCmd(ctx context.Context) {
 		}
 		defer conn.Close()
 
-		if err := epic.SetTaskContext(ctx, conn, q, taskID, markdown); err != nil {
+		if err := epic.SetTaskContext(ctx, conn, q, taskID, text); err != nil {
 			return jsonError(err)
 		}
 		fmt.Println(jsonSuccess(nil))
@@ -109,11 +115,14 @@ func registerSetContextCmd(ctx context.Context) {
 
 func registerRecordCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
-	var rawID, text string
+	var rawID string
 	cmd := app.SubCommand("task:record", "Append agent record")
 	cmd.StringArg(&rawID, "id", "Task ID")
-	cmd.StringArg(&text, "text", "Record text")
 	cmd.Run(func() error {
+		text, err := readStdin()
+		if err != nil {
+			return jsonError(err)
+		}
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
 			return jsonError(err)

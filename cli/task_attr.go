@@ -16,12 +16,15 @@ func registerAttrCommands(ctx context.Context) {
 
 func registerAttrSetCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
-	var epicArg, attr, value string
+	var epicArg, attr string
 	cmd := app.SubCommand("attr:set", "Set an epic attribute")
 	cmd.StringArg(&epicArg, "epic", "Epic ID")
 	cmd.StringArg(&attr, "attr", "Attribute name")
-	cmd.StringArg(&value, "value", "Attribute value")
 	cmd.Run(func() error {
+		value, err := readStdin()
+		if err != nil {
+			return jsonError(err)
+		}
 		conn, q, err := epic.OpenEpic(epicArg, cfg.EpicsDir)
 		if err != nil {
 			return jsonError(err)

@@ -16,6 +16,8 @@ func registerStructureCommands(ctx context.Context) {
 	registerUnafterCmd(ctx)
 }
 
+// @Todo Add `skipfirst=true` argument to
+
 func registerSplitCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
 	var rawID string

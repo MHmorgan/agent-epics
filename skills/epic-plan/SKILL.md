@@ -43,7 +43,7 @@ Run this on every task, starting with the root.
    (`ae context <parent>`) for children — write a minimal
    seed: a title, one paragraph capturing the task's intent, and if the
    shape is obvious, a provisional outline of the work. Keep it brief;
-   this is scaffolding, not the plan. `ae task:set-body <id> <seed>`.
+   this is scaffolding, not the plan. `printf '%s' "$seed" | ae task:set-body <id>`.
 2. **Scope: branch or leaf?** Ask the user explicitly, surfacing your
    read as the recommended option:
    - **Leaf** — one chunk of work, a single implementation session could
@@ -57,7 +57,7 @@ Run this on every task, starting with the root.
    starts looking obviously right — re-scope, restructure the body,
    continue.
 3. **Restructure to the chosen template** and write it:
-   `ae task:set-body <id> <markdown>`. Slot the seed content into the
+   `printf '%s' "$body" | ae task:set-body <id>`. Slot the seed content into the
    appropriate sections. See *Target body — leaf task* or *Target body —
    branch task (pre-split)* below.
 4. **Interview into the template.** Refine the body through questions
@@ -76,7 +76,7 @@ Run this on every task, starting with the root.
      are ordered. Record with `ae task:after <child> <pred>`. Deps
      stay editable anytime with `task:after` / `task:unafter` —
      re-prompt only if structure materially changes.
-   - **Branch context:** `ae task:set-context <id>` with shared info
+   - **Branch context:** `printf '%s' "$context" | ae task:set-context <id>` with shared info
      children will need (cross-cutting decisions, terminology,
      references). Keep it ≤ 15 lines.
    - Recurse into child `:1`, finish its entire subtree, then `:2`, etc.
@@ -86,8 +86,8 @@ Run this on every task, starting with the root.
    - **Triage** findings; resolve Category A via a focused follow-up
      interview.
    - Populate **Implementation notes** with Category B findings.
-   - Write the finalized body: `ae task:set-body <id> <markdown>`.
-   - Write the handoff context: `ae task:set-context <id>`. Keep it ≤
+   - Write the finalized body: `printf '%s' "$body" | ae task:set-body <id>`.
+   - Write the handoff context: `printf '%s' "$context" | ae task:set-context <id>`. Keep it ≤
      15 lines — what the implementer needs that isn't obvious from
      body or ancestor contexts.
 
@@ -280,7 +280,7 @@ Flow:
 3. After Category A is resolved (or if none existed), populate
    **Implementation notes** with Category B findings from all three
    reviews.
-4. Write the finalized body: `ae task:set-body <id> <markdown>`.
+4. Write the finalized body: `printf '%s' "$body" | ae task:set-body <id>`.
 5. Show the final body and confirm before writing the handoff context.
 
 ---
@@ -291,16 +291,17 @@ Flow:
 ae epics                                 # list epics (resume check)
 ae task:new-epic <slug>                  # create a new epic
 ae show <id>                             # read body (plain text)
-ae task:set-body <id> <markdown>         # write body (leaf only)
+<body> | ae task:set-body <id>            # body from stdin
 ae context <id>                          # read composed context (plain text)
-ae task:set-context <id> <markdown>      # write context (any task)
+<context> | ae task:set-context <id>      # context from stdin
 ae task:list parent=<id>                 # list immediate children
 ae task:split <id>                       # split leaf on `---`
 ae task:unsplit <id>                     # undo split (rare)
 ae task:add-child <parent>               # add a child to a branch
 ae task:after <id> <pred>                # sibling dependency edge
 ae task:unafter <id> <pred>              # remove dependency edge
-ae task:record <id> <text>               # append an agent note
+<text> | ae task:record <id>               # note from stdin
+ae help                                  # tool help
 ```
 
 Write commands (`task:*`) return a JSON envelope `{"ok": bool, "data": ..., "error": ...}`.

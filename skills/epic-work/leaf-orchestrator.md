@@ -27,7 +27,7 @@ Treat these as the spec. Everything downstream references them.
 Append a start record:
 
 ```
-ae task:record <leaf> "leaf orchestrator started"
+printf 'leaf orchestrator started' | ae task:record <leaf>
 ```
 
 ---
@@ -180,7 +180,7 @@ Report:
 ### 5a. Completion record
 
 ```
-ae task:record <leaf> "<very short summary of outcome>"
+printf '%s' "<very short summary of outcome>" | ae task:record <leaf>
 ```
 
 One line. If there were notable events mid-execution (a blocked subagent,
@@ -206,7 +206,7 @@ Avoid:
 - Information already captured in records
 
 ```
-ae task:set-context <leaf> <markdown>
+printf '%s' "$context" | ae task:set-context <leaf>
 ```
 
 ---

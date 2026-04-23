@@ -199,7 +199,7 @@ that affects other tasks (unresolved issues, blockers, etc.)
 A context should be with <= 15 lines. Otherwise it might grow too big when 
 appending parents and siblings.
 
-- `ae task:set-context <id> <markdown>` — writes or overwrites.
+- `ae task:set-context <id>` — writes or overwrites (markdown from stdin).
 - `ae context <id>` — **composes ancestors-first** with structured
   headers:
 
@@ -229,7 +229,7 @@ Flat append-only table. Queried by hierarchical ID prefix:
 - `ae task:records my-epic` — subtree (default; all records where `task`
   begins with `my-epic:` or equals `my-epic`).
 - `ae task:records my-epic self` — exact match only.
-- `ae task:record <id> <text>` — append an agent entry.
+- `ae task:record <id>` — append an agent entry (text from stdin).
 
 System records are auto-written for structural events; see *System records*
 below.
@@ -337,6 +337,9 @@ Written on the same `record` table with `source = 'system'`. They appear in
 All human interface commands pretty-prints its output.
 All task commands uses json output for machine readability.
 
+Commands marked with "from stdin" read their freeform text input from standard
+input rather than a positional argument.
+
 ### Human interface
 
 ```
@@ -364,9 +367,9 @@ ae task:next <epic>                 # first ready pending leaf
 ```
 ae task:new-epic <epic>             # creates epic (top-level)
 ae task:add-child <parent>          # create a new child for the given parent task (must be a branch)
-ae task:set-body <id> <markdown>    # replaces body; leaf only
-ae task:set-context <id> <markdown> # replaces context; any task
-ae task:record  <id> <text>         # appends agent record
+ae task:set-body <id>               # replaces body; leaf only          # body from stdin
+ae task:set-context <id>            # replaces context; any task        # context from stdin
+ae task:record  <id>                # appends agent record              # text from stdin
 ```
 
 ### Structure
@@ -391,7 +394,7 @@ ae task:abandon  <id> <reason>      # → abandoned
 ### Epic attributes
 
 ```
-ae attr:set <epic> <attr> <value>   # set an epic attribute
+ae attr:set <epic> <attr>           # set an epic attribute              # value from stdin
 ae attr:get <epic> <attr>           # get the content of an epic attribute
 ```
 

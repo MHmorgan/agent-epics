@@ -137,7 +137,7 @@ Compose the summary (markdown, moderate length) covering:
 Write it:
 
 ```
-ae attr:set <epic> summary <markdown>
+printf '%s' "$summary" | ae attr:set <epic> summary
 ```
 
 ### Branch scope → branch context rollup
@@ -145,7 +145,7 @@ ae attr:set <epic> summary <markdown>
 Update the branch's context with a delta-focused rollup:
 
 ```
-ae task:set-context <branch> <markdown>
+printf '%s' "$markdown" | ae task:set-context <branch>
 ```
 
 Short. The branch context still has to compose with downstream planning,
@@ -208,8 +208,8 @@ ae task:done <leaf>                     # active → done
 ae task:block <leaf> <reason>           # active → blocked
 ae task:abandon <leaf> <reason>         # → abandoned
 ae task:records <id>                    # read subtree records
-ae task:set-context <id> <markdown>     # write context (any task)
-ae attr:set <epic> summary <markdown>   # write epic summary
+printf ... | ae task:set-context <id>   # write context (any task, stdin)
+printf ... | ae attr:set <epic> summary # write epic summary (stdin)
 ```
 
 Task commands return `{"ok": bool, "data": ..., "error": ...}`. Check
