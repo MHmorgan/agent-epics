@@ -4,72 +4,66 @@ import (
 	"context"
 	"fmt"
 
-	clilib "github.com/Minimal-Viable-Software/cli-go"
-
+	"github.com/MHmorgan/agent-epics/common"
 	"github.com/MHmorgan/agent-epics/epic"
 )
 
-// RegisterStructureCommands registers task:split, task:unsplit, task:after, task:unafter.
-func RegisterStructureCommands(app *clilib.Application, epicsDir string) {
-	registerSplitCmd(app, epicsDir)
-	registerUnsplitCmd(app, epicsDir)
-	registerAfterCmd(app, epicsDir)
-	registerUnafterCmd(app, epicsDir)
+// registerStructureCommands registers task:split, task:unsplit, task:after, task:unafter.
+func registerStructureCommands(ctx context.Context) {
+	registerSplitCmd(ctx)
+	registerUnsplitCmd(ctx)
+	registerAfterCmd(ctx)
+	registerUnafterCmd(ctx)
 }
 
-func registerSplitCmd(app *clilib.Application, epicsDir string) {
+func registerSplitCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var rawID string
 	cmd := app.SubCommand("task:split", "Split a task into subtasks")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
-		ctx := context.Background()
 		if err := epic.SplitTask(ctx, conn, q, taskID); err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(nil))
+		fmt.Println(jsonSuccess(nil))
 		return nil
 	})
 }
 
-func registerUnsplitCmd(app *clilib.Application, epicsDir string) {
+func registerUnsplitCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var rawID string
 	cmd := app.SubCommand("task:unsplit", "Unsplit a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
-		ctx := context.Background()
 		if err := epic.UnsplitTask(ctx, conn, q, taskID); err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(nil))
+		fmt.Println(jsonSuccess(nil))
 		return nil
 	})
 }
 
-func registerAfterCmd(app *clilib.Application, epicsDir string) {
+func registerAfterCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var rawID, rawPred string
 	cmd := app.SubCommand("task:after", "Add a dependency (task after predecessor)")
 	cmd.StringArg(&rawID, "id", "Task ID")
@@ -77,31 +71,27 @@ func registerAfterCmd(app *clilib.Application, epicsDir string) {
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		predID, err := epic.ParseTaskID(rawPred)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
-		ctx := context.Background()
 		if err := epic.AddDependency(ctx, q, taskID, predID); err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(nil))
+		fmt.Println(jsonSuccess(nil))
 		return nil
 	})
 }
 
-func registerUnafterCmd(app *clilib.Application, epicsDir string) {
+func registerUnafterCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var rawID, rawPred string
 	cmd := app.SubCommand("task:unafter", "Remove a dependency")
 	cmd.StringArg(&rawID, "id", "Task ID")
@@ -109,26 +99,21 @@ func registerUnafterCmd(app *clilib.Application, epicsDir string) {
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		predID, err := epic.ParseTaskID(rawPred)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
-		ctx := context.Background()
 		if err := epic.RemoveDependency(ctx, q, taskID, predID); err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(nil))
+		fmt.Println(jsonSuccess(nil))
 		return nil
 	})
 }

@@ -1,9 +1,16 @@
-package epic
+package cli
 
 import (
 	"encoding/json"
 	"fmt"
 )
+
+// AgentError is an error with JSON with the error message in
+type AgentError string
+
+func (e AgentError) Error() string {
+	return string(e)
+}
 
 // envelope is the standard JSON response wrapper for task commands.
 type envelope struct {
@@ -12,8 +19,8 @@ type envelope struct {
 	Error string `json:"error,omitempty"`
 }
 
-// JSONSuccess returns a JSON string wrapping data in {"ok": true, "data": ...}.
-func JSONSuccess(data any) string {
+// jsonSuccess returns a JSON string wrapping data in {"ok": true, "data": ...}.
+func jsonSuccess(data any) string {
 	b, err := json.Marshal(envelope{OK: true, Data: data})
 	if err != nil {
 		return fmt.Sprintf(`{"ok":false,"error":"marshal error: %s"}`, escapeJSON(err.Error()))
@@ -21,13 +28,13 @@ func JSONSuccess(data any) string {
 	return string(b)
 }
 
-// JSONError returns a JSON string wrapping an error in {"ok": false, "error": "..."}.
-func JSONError(err error) string {
+// jsonError returns a JSON AgentError wrapping an error in {"ok": false, "error": "..."}.
+func jsonError(err error) AgentError {
 	b, merr := json.Marshal(envelope{OK: false, Error: err.Error()})
 	if merr != nil {
-		return fmt.Sprintf(`{"ok":false,"error":"marshal error: %s"}`, escapeJSON(err.Error()))
+		return AgentError(fmt.Sprintf(`{"ok":false,"error":"marshal error: %s"}`, escapeJSON(err.Error())))
 	}
-	return string(b)
+	return AgentError(string(b))
 }
 
 // escapeJSON escapes a string for safe embedding in a JSON string literal.

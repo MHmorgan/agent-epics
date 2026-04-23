@@ -4,85 +4,81 @@ import (
 	"context"
 	"fmt"
 
-	clilib "github.com/Minimal-Viable-Software/cli-go"
-
+	"github.com/MHmorgan/agent-epics/common"
 	"github.com/MHmorgan/agent-epics/epic"
 )
 
-// RegisterStatusCommands registers task:start, task:block, task:unblock, task:done, task:abandon.
-func RegisterStatusCommands(app *clilib.Application, epicsDir string) {
-	registerStartCmd(app, epicsDir)
-	registerBlockCmd(app, epicsDir)
-	registerUnblockCmd(app, epicsDir)
-	registerDoneCmd(app, epicsDir)
-	registerAbandonCmd(app, epicsDir)
+// registerStatusCommands registers task:start, task:block, task:unblock, task:done, task:abandon.
+func registerStatusCommands(ctx context.Context) {
+	registerStartCmd(ctx)
+	registerBlockCmd(ctx)
+	registerUnblockCmd(ctx)
+	registerDoneCmd(ctx)
+	registerAbandonCmd(ctx)
 }
 
-func registerStartCmd(app *clilib.Application, epicsDir string) {
+func registerStartCmd(ctx context.Context) {
 	var rawID string
 	cmd := app.SubCommand("task:start", "Start working on a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
-		return transitionTask(rawID, epicsDir, epic.StatusActive, "")
+		return transitionTask(ctx, rawID, epic.StatusActive, "")
 	})
 }
 
-func registerBlockCmd(app *clilib.Application, epicsDir string) {
+func registerBlockCmd(ctx context.Context) {
 	var rawID, reason string
 	cmd := app.SubCommand("task:block", "Block a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.StringArg(&reason, "reason", "Reason for blocking")
 	cmd.Run(func() error {
-		return transitionTask(rawID, epicsDir, epic.StatusBlocked, reason)
+		return transitionTask(ctx, rawID, epic.StatusBlocked, reason)
 	})
 }
 
-func registerUnblockCmd(app *clilib.Application, epicsDir string) {
+func registerUnblockCmd(ctx context.Context) {
 	var rawID string
 	cmd := app.SubCommand("task:unblock", "Unblock a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
-		return transitionTask(rawID, epicsDir, epic.StatusActive, "")
+		return transitionTask(ctx, rawID, epic.StatusActive, "")
 	})
 }
 
-func registerDoneCmd(app *clilib.Application, epicsDir string) {
+func registerDoneCmd(ctx context.Context) {
 	var rawID string
 	cmd := app.SubCommand("task:done", "Complete a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
-		return transitionTask(rawID, epicsDir, epic.StatusDone, "")
+		return transitionTask(ctx, rawID, epic.StatusDone, "")
 	})
 }
 
-func registerAbandonCmd(app *clilib.Application, epicsDir string) {
+func registerAbandonCmd(ctx context.Context) {
 	var rawID, reason string
 	cmd := app.SubCommand("task:abandon", "Abandon a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.StringArg(&reason, "reason", "Reason for abandoning")
 	cmd.Run(func() error {
-		return transitionTask(rawID, epicsDir, epic.StatusAbandoned, reason)
+		return transitionTask(ctx, rawID, epic.StatusAbandoned, reason)
 	})
 }
 
 // transitionTask parses the task ID, opens the epic, and performs the status transition.
-func transitionTask(rawID, epicsDir string, to epic.Status, reason string) error {
+func transitionTask(ctx context.Context, rawID string, to epic.Status, reason string) error {
+	cfg := common.GetConfig(ctx)
 	taskID, err := epic.ParseTaskID(rawID)
 	if err != nil {
-		fmt.Println(epic.JSONError(err))
-		return err
+		return jsonError(err)
 	}
-	conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+	conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 	if err != nil {
-		fmt.Println(epic.JSONError(err))
-		return err
+		return jsonError(err)
 	}
 	defer conn.Close()
-	ctx := context.Background()
 	if err := epic.TransitionStatus(ctx, conn, q, taskID, to, reason); err != nil {
-		fmt.Println(epic.JSONError(err))
-		return err
+		return jsonError(err)
 	}
-	fmt.Println(epic.JSONSuccess(nil))
+	fmt.Println(jsonSuccess(nil))
 	return nil
 }

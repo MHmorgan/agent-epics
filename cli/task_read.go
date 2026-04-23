@@ -4,49 +4,47 @@ import (
 	"context"
 	"fmt"
 
-	clilib "github.com/Minimal-Viable-Software/cli-go"
-
+	"github.com/MHmorgan/agent-epics/common"
 	"github.com/MHmorgan/agent-epics/epic"
 )
 
-// RegisterTaskReadCommands registers task:get, task:list, task:context:get,
+// registerTaskReadCommands registers task:get, task:list, task:context:get,
 // task:records, task:next.
-func RegisterTaskReadCommands(app *clilib.Application, epicsDir string) {
-	registerTaskGetCmd(app, epicsDir)
-	registerTaskListCmd(app, epicsDir)
-	registerTaskContextGetCmd(app, epicsDir)
-	registerTaskRecordsCmd(app, epicsDir)
-	registerTaskNextCmd(app, epicsDir)
+func registerTaskReadCommands(ctx context.Context) {
+	registerTaskGetCmd(ctx)
+	registerTaskListCmd(ctx)
+	registerTaskContextGetCmd(ctx)
+	registerTaskRecordsCmd(ctx)
+	registerTaskNextCmd(ctx)
 }
 
-func registerTaskGetCmd(app *clilib.Application, epicsDir string) {
+func registerTaskGetCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var rawID string
 	cmd := app.SubCommand("task:get", "Get a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
 
-		task, err := epic.GetTask(context.Background(), q, taskID)
+		task, err := epic.GetTask(ctx, q, taskID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(task))
+		fmt.Println(jsonSuccess(task))
 		return nil
 	})
 }
 
-func registerTaskListCmd(app *clilib.Application, epicsDir string) {
+func registerTaskListCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var epicArg string
 	var showAll bool
 	var parentFlag string
@@ -56,10 +54,9 @@ func registerTaskListCmd(app *clilib.Application, epicsDir string) {
 	cmd.BoolFlag(&showAll, "all", "Include terminal tasks")
 	cmd.StringFlag(&parentFlag, "parent", "Filter to children of this ID")
 	cmd.Run(func() error {
-		conn, q, err := epic.OpenEpic(epicArg, epicsDir)
+		conn, q, err := epic.OpenEpic(epicArg, cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
 
@@ -67,49 +64,46 @@ func registerTaskListCmd(app *clilib.Application, epicsDir string) {
 		if parentFlag != "" {
 			parentID, err = epic.ParseTaskID(parentFlag)
 			if err != nil {
-				fmt.Println(epic.JSONError(err))
-				return err
+				return jsonError(err)
 			}
 		}
 
-		tasks, err := epic.ListTasks(context.Background(), q, parentID, showAll)
+		tasks, err := epic.ListTasks(ctx, q, parentID, showAll)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(tasks))
+		fmt.Println(jsonSuccess(tasks))
 		return nil
 	})
 }
 
-func registerTaskContextGetCmd(app *clilib.Application, epicsDir string) {
+func registerTaskContextGetCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var rawID string
 	cmd := app.SubCommand("task:context:get", "Get composed context")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
 
-		composed, err := epic.ComposeContext(context.Background(), q, taskID)
+		composed, err := epic.ComposeContext(ctx, q, taskID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(map[string]string{"context": composed}))
+		fmt.Println(jsonSuccess(map[string]string{"context": composed}))
 		return nil
 	})
 }
 
-func registerTaskRecordsCmd(app *clilib.Application, epicsDir string) {
+func registerTaskRecordsCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var rawID string
 	var selfOnly bool
 
@@ -119,44 +113,40 @@ func registerTaskRecordsCmd(app *clilib.Application, epicsDir string) {
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), epicsDir)
+		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
 
-		records, err := epic.GetRecords(context.Background(), q, taskID, selfOnly)
+		records, err := epic.GetRecords(ctx, q, taskID, selfOnly)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(records))
+		fmt.Println(jsonSuccess(records))
 		return nil
 	})
 }
 
-func registerTaskNextCmd(app *clilib.Application, epicsDir string) {
+func registerTaskNextCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	var epicArg string
 	cmd := app.SubCommand("task:next", "Get next ready task")
 	cmd.StringArg(&epicArg, "epic", "Epic ID")
 	cmd.Run(func() error {
-		conn, q, err := epic.OpenEpic(epicArg, epicsDir)
+		conn, q, err := epic.OpenEpic(epicArg, cfg.EpicsDir)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
 		defer conn.Close()
 
-		task, err := epic.NextTask(context.Background(), conn, q, epicArg)
+		task, err := epic.NextTask(ctx, conn, q, epicArg)
 		if err != nil {
-			fmt.Println(epic.JSONError(err))
-			return err
+			return jsonError(err)
 		}
-		fmt.Println(epic.JSONSuccess(task))
+		fmt.Println(jsonSuccess(task))
 		return nil
 	})
 }

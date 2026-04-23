@@ -1,31 +1,33 @@
 package cli
 
 import (
+	"context"
 	"fmt"
-	"os"
 
-	clilib "github.com/Minimal-Viable-Software/cli-go"
-
+	"github.com/MHmorgan/agent-epics/common"
 	"github.com/MHmorgan/agent-epics/epic"
+	"github.com/Minimal-Viable-Software/log-go"
 )
 
-// RegisterHumanCommands registers epics, rm, purge commands on the app.
-func RegisterHumanCommands(app *clilib.Application, epicsDir string) {
-	registerEpicsCmd(app, epicsDir)
-	registerRmCmd(app, epicsDir)
-	registerPurgeCmd(app, epicsDir)
+// registerHumanCommands registers epics, rm, purge commands on the app.
+func registerHumanCommands(ctx context.Context) {
+	epicsCmd(ctx)
+	rmCmd(ctx)
+	purgeCmd(ctx)
 }
 
-func registerEpicsCmd(app *clilib.Application, epicsDir string) {
+func epicsCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
+
 	cmd := app.SubCommand("epics", "List all epics")
+
 	cmd.Run(func() error {
-		infos, err := epic.ListEpics(epicsDir)
+		infos, err := epic.ListEpics(cfg.EpicsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			return err
+			return fmt.Errorf("list epics: %w", err)
 		}
 		if len(infos) == 0 {
-			fmt.Println("No epics found.")
+			log.Infoln("No epics found.")
 			return nil
 		}
 		for _, info := range infos {
@@ -35,34 +37,37 @@ func registerEpicsCmd(app *clilib.Application, epicsDir string) {
 	})
 }
 
-func registerRmCmd(app *clilib.Application, epicsDir string) {
-	var epicID string
+func rmCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	cmd := app.SubCommand("rm", "Remove an epic")
+
+	var epicID string
 	cmd.StringArg(&epicID, "epic", "Epic ID to remove")
+
 	cmd.Run(func() error {
-		if err := epic.RemoveEpic(epicID, epicsDir); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			return err
+		if err := epic.RemoveEpic(epicID, cfg.EpicsDir); err != nil {
+			return fmt.Errorf("remove epic: %w", err)
 		}
-		fmt.Printf("Removed %s\n", epicID)
+		log.Infoln("Removed", epicID)
 		return nil
 	})
 }
 
-func registerPurgeCmd(app *clilib.Application, epicsDir string) {
+func purgeCmd(ctx context.Context) {
+	cfg := common.GetConfig(ctx)
 	cmd := app.SubCommand("purge", "Remove all terminal epics")
+
 	cmd.Run(func() error {
-		purged, err := epic.PurgeTerminalEpics(epicsDir)
+		purged, err := epic.PurgeTerminalEpics(cfg.EpicsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			return err
+			return fmt.Errorf("purge epics: %w", err)
 		}
 		if len(purged) == 0 {
-			fmt.Println("No terminal epics to purge.")
+			log.Infoln("No terminal epics to purge.")
 			return nil
 		}
 		for _, id := range purged {
-			fmt.Printf("Purged %s\n", id)
+			log.Infoln("Purged", id)
 		}
 		return nil
 	})
