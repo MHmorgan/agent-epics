@@ -172,8 +172,8 @@ Never stored. Computed on read.
 
 ### body — the plan
 
-Markdown. On a leaf, fully editable via `ae task:set`. On a branch, frozen
-read-only at split time; `ae task:set` on a branch fails. `ae task:get`
+Markdown. On a leaf, fully editable via `ae task:set-body`. On a branch, frozen
+read-only at split time; `ae task:set-body` on a branch fails. `ae task`
 returns the body regardless.
 
 When an agent starts working on a task it reads the body.
@@ -199,8 +199,8 @@ that affects other tasks (unresolved issues, blockers, etc.)
 A context should be with <= 15 lines. Otherwise it might grow too big when 
 appending parents and siblings.
 
-- `ae task:context:set <id> <markdown>` — writes or overwrites.
-- `ae task:context:get <id>` — **composes ancestors-first** with structured
+- `ae task:set-context <id> <markdown>` — writes or overwrites.
+- `ae context <id>` — **composes ancestors-first** with structured
   headers:
 
   ```
@@ -341,6 +341,8 @@ All task commands uses json output for machine readability.
 
 ```
 ae epics          # List all epics (root tasks)
+ae show <id>      # Print task body as plain text
+ae context <id>   # Print composed context as plain text
 ae rm <epic>      # Remove the epic
 ae purge          # Remove all terminal epics (done or abandoned)
 ```
@@ -351,8 +353,7 @@ ae purge          # Remove all terminal epics (done or abandoned)
 ae task:list                        # all tasks with a non-terminal status
 ae task:list all                    # include done/abandoned tasks
 ae task:list parent=<id>            # immediate children of a branch
-ae task:get <id>                    # body (markdown)
-ae task:context:get <id>            # composed context
+ae task <id>                        # body (markdown)
 ae task:records <id>                # subtree records (default)
 ae task:records <id> self           # exact task only
 ae task:next <epic>                 # first ready pending leaf
@@ -363,8 +364,8 @@ ae task:next <epic>                 # first ready pending leaf
 ```
 ae task:new-epic <epic>             # creates epic (top-level)
 ae task:add-child <parent>          # create a new child for the given parent task (must be a branch)
-ae task:set <id> <markdown>         # replaces body; leaf only
-ae task:context:set <id> <markdown> # replaces context; any task
+ae task:set-body <id> <markdown>    # replaces body; leaf only
+ae task:set-context <id> <markdown> # replaces context; any task
 ae task:record  <id> <text>         # appends agent record
 ```
 

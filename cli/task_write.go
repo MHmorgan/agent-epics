@@ -8,13 +8,13 @@ import (
 	"github.com/MHmorgan/agent-epics/epic"
 )
 
-// registerTaskWriteCommands registers task:new-epic, task:add-child, task:set,
-// task:context:set, task:record.
+// registerTaskWriteCommands registers task:new-epic, task:add-child, task:set-body,
+// task:set-context, task:record.
 func registerTaskWriteCommands(ctx context.Context) {
 	registerNewEpicCmd(ctx)
 	registerAddChildCmd(ctx)
-	registerSetCmd(ctx)
-	registerContextSetCmd(ctx)
+	registerSetBodyCmd(ctx)
+	registerSetContextCmd(ctx)
 	registerRecordCmd(ctx)
 }
 
@@ -57,10 +57,10 @@ func registerAddChildCmd(ctx context.Context) {
 	})
 }
 
-func registerSetCmd(ctx context.Context) {
+func registerSetBodyCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
 	var rawID, markdown string
-	cmd := app.SubCommand("task:set", "Set task body")
+	cmd := app.SubCommand("task:set-body", "Set task body")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.StringArg(&markdown, "markdown", "Body text")
 	cmd.Run(func() error {
@@ -82,10 +82,10 @@ func registerSetCmd(ctx context.Context) {
 	})
 }
 
-func registerContextSetCmd(ctx context.Context) {
+func registerSetContextCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
 	var rawID, markdown string
-	cmd := app.SubCommand("task:context:set", "Set task context")
+	cmd := app.SubCommand("task:set-context", "Set task context")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.StringArg(&markdown, "markdown", "Context text")
 	cmd.Run(func() error {

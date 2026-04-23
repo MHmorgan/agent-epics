@@ -15,10 +15,10 @@ contains a finalized plan produced by `/epic-plan`.
 The leaf id was passed in your prompt. Read:
 
 ```
-ae task:get <leaf>            # body: Problem, Desired behavior, Acceptance
+ae show <leaf>                # body: Problem, Desired behavior, Acceptance
                               # criteria, Scope, Constraints, Context,
                               # Implementation notes
-ae task:context:get <leaf>    # composed context (ancestors + terminal
+ae context <leaf>             # composed context (ancestors + terminal
                               # siblings + self)
 ```
 
@@ -42,8 +42,8 @@ the interview missed.
 ### 1a. Create implementation plan
 
 Dispatch a `general-purpose` subagent with:
-- The leaf body (`ae task:get <leaf>`)
-- The composed context (`ae task:context:get <leaf>`)
+- The leaf body (`ae show <leaf>`)
+- The composed context (`ae context <leaf>`)
 - Instruction to explore the codebase and understand existing patterns
 
 The plan agent produces a plan that:
@@ -206,7 +206,7 @@ Avoid:
 - Information already captured in records
 
 ```
-ae task:context:set <leaf> <markdown>
+ae task:set-context <leaf> <markdown>
 ```
 
 ---

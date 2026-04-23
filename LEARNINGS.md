@@ -20,8 +20,9 @@ Preferences and patterns observed from the codebase and planning discussions.
 ## Software architecture
 
 - One SQLite file per epic -- no shared database, no persistent connections
-- CLI commands use colon-separated naming: `task:list`, `task:context:get`, `attr:set`
+- CLI commands use colon-separated naming: `task:list`, `task:set-body`, `attr:set`
 - JSON envelope `{"ok": bool, "data": ..., "error": ...}` for machine-readable task commands; simple text for human commands
+- Two command tiers: colon-separated for machine-readable JSON (`task:list`, `task:set-body`), top-level for human plain text (`show`, `context`, `epics`)
 - Errors in task commands go in the JSON envelope to stdout (with non-zero exit code), not stderr
 - Sequential DB migration via `PRAGMA user_version`
 - Naive literal `---` line splitting for task decomposition (no markdown-aware parsing)

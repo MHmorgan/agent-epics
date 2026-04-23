@@ -36,7 +36,7 @@ summarize on completion.
 Verify the task exists and find its shape:
 
 ```
-ae task:get <id>             # does it exist?
+ae task <id>                 # does it exist?
 ae task:list parent=<id>     # does it have children?
 ```
 
@@ -126,7 +126,7 @@ terminal — done or abandoned — with no blocks).
 
 Gather material:
 - Records: `ae task:records <epic>`
-- Each leaf's handoff context: `ae task:context:get <leaf>`
+- Each leaf's handoff context: `ae context <leaf>`
 
 Compose the summary (markdown, moderate length) covering:
 - What was accomplished
@@ -145,7 +145,7 @@ ae attr:set <epic> summary <markdown>
 Update the branch's context with a delta-focused rollup:
 
 ```
-ae task:context:set <branch> <markdown>
+ae task:set-context <branch> <markdown>
 ```
 
 Short. The branch context still has to compose with downstream planning,
@@ -198,7 +198,9 @@ they'll ask separately.
 ## `ae` command reference (subset used by this skill)
 
 ```
-ae task:get <id>                        # read a task
+ae task <id>                            # read a task (JSON)
+ae show <id>                            # read task body (plain text)
+ae context <id>                         # read composed context (plain text)
 ae task:list parent=<id>                # list children (shape check)
 ae task:next <epic>                     # next ready pending leaf
 ae task:start <leaf>                    # pending/blocked → active
@@ -206,8 +208,7 @@ ae task:done <leaf>                     # active → done
 ae task:block <leaf> <reason>           # active → blocked
 ae task:abandon <leaf> <reason>         # → abandoned
 ae task:records <id>                    # read subtree records
-ae task:context:get <id>                # read composed context
-ae task:context:set <id> <markdown>     # write context (any task)
+ae task:set-context <id> <markdown>     # write context (any task)
 ae attr:set <epic> summary <markdown>   # write epic summary
 ```
 

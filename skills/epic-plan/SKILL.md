@@ -40,10 +40,10 @@ Run this on every task, starting with the root.
 
 1. **Draft a short seed.** Based on available context — the user's
    description for the root, or the parent body plus ancestor contexts
-   (`ae task:context:get <parent>`) for children — write a minimal
+   (`ae context <parent>`) for children — write a minimal
    seed: a title, one paragraph capturing the task's intent, and if the
    shape is obvious, a provisional outline of the work. Keep it brief;
-   this is scaffolding, not the plan. `ae task:set <id> <seed>`.
+   this is scaffolding, not the plan. `ae task:set-body <id> <seed>`.
 2. **Scope: branch or leaf?** Ask the user explicitly, surfacing your
    read as the recommended option:
    - **Leaf** — one chunk of work, a single implementation session could
@@ -57,12 +57,12 @@ Run this on every task, starting with the root.
    starts looking obviously right — re-scope, restructure the body,
    continue.
 3. **Restructure to the chosen template** and write it:
-   `ae task:set <id> <markdown>`. Slot the seed content into the
+   `ae task:set-body <id> <markdown>`. Slot the seed content into the
    appropriate sections. See *Target body — leaf task* or *Target body —
    branch task (pre-split)* below.
 4. **Interview into the template.** Refine the body through questions
    (see *Interview guidelines*). Rewrite the full body after each
-   meaningful answer via `ae task:set` so the user sees progress.
+   meaningful answer via `ae task:set-body` so the user sees progress.
 5. **Finalize:**
 
    **Branch path:**
@@ -76,7 +76,7 @@ Run this on every task, starting with the root.
      are ordered. Record with `ae task:after <child> <pred>`. Deps
      stay editable anytime with `task:after` / `task:unafter` —
      re-prompt only if structure materially changes.
-   - **Branch context:** `ae task:context:set <id>` with shared info
+   - **Branch context:** `ae task:set-context <id>` with shared info
      children will need (cross-cutting decisions, terminology,
      references). Keep it ≤ 15 lines.
    - Recurse into child `:1`, finish its entire subtree, then `:2`, etc.
@@ -86,8 +86,8 @@ Run this on every task, starting with the root.
    - **Triage** findings; resolve Category A via a focused follow-up
      interview.
    - Populate **Implementation notes** with Category B findings.
-   - Write the finalized body: `ae task:set <id> <markdown>`.
-   - Write the handoff context: `ae task:context:set <id>`. Keep it ≤
+   - Write the finalized body: `ae task:set-body <id> <markdown>`.
+   - Write the handoff context: `ae task:set-context <id>`. Keep it ≤
      15 lines — what the implementer needs that isn't obvious from
      body or ancestor contexts.
 
@@ -98,7 +98,7 @@ Run this on every task, starting with the root.
 - Use `AskUserQuestion` for every interview question. No plain-text
   questions unless the user asks to chat.
 - One question at a time. Do not batch.
-- Rewrite the body after each meaningful answer via `ae task:set` so the
+- Rewrite the body after each meaningful answer via `ae task:set-body` so the
   user sees progress and can correct course.
 - Plain, direct language. No filler.
 - Acceptance criteria: concrete, testable, observable outcomes. Transform
@@ -187,7 +187,7 @@ a meaningful starting draft.
 
 ## Context authoring
 
-`ae task:context:get <leaf>` returns the composition:
+`ae context <leaf>` returns the composition:
 epic context → parent context → terminal sibling contexts → self context.
 They stack, so keep each context ≤ 15 lines.
 
@@ -205,8 +205,8 @@ They stack, so keep each context ≤ 15 lines.
 
 After the user confirms the leaf interview is complete, launch THREE review
 agents in parallel. Each receives:
-- The body (`ae task:get <id>`)
-- The composed context (`ae task:context:get <id>`)
+- The body (`ae show <id>`)
+- The composed context (`ae context <id>`)
 - Read access to the codebase
 
 ### 1. Software Review (general-purpose subagent)
@@ -244,7 +244,7 @@ Once every descendant leaf of a branch has been planned, run ONE
 general-purpose subagent with:
 - The branch body (frozen, pre-split snapshot)
 - The branch context
-- The body of each immediate child (`ae task:get <child>`)
+- The body of each immediate child (`ae show <child>`)
 
 The agent answers:
 - Does the split still make sense given what the children turned into?
@@ -252,7 +252,7 @@ The agent answers:
   the new child.
 - Are sibling dependencies correct, complete, and cycle-free?
 - Does the branch context adequately support the children, or should it
-  be extended? → `ae task:context:set`.
+  be extended? → `ae task:set-context`.
 
 If the review surfaces a structural problem that can't be repaired by
 adding a child or editing deps/context, `ae task:unsplit` + re-plan may
@@ -280,7 +280,7 @@ Flow:
 3. After Category A is resolved (or if none existed), populate
    **Implementation notes** with Category B findings from all three
    reviews.
-4. Write the finalized body: `ae task:set <id> <markdown>`.
+4. Write the finalized body: `ae task:set-body <id> <markdown>`.
 5. Show the final body and confirm before writing the handoff context.
 
 ---
@@ -290,10 +290,10 @@ Flow:
 ```
 ae epics                                 # list epics (resume check)
 ae task:new-epic <slug>                  # create a new epic
-ae task:get <id>                         # read body
-ae task:set <id> <markdown>              # write body (leaf only)
-ae task:context:get <id>                 # read composed context
-ae task:context:set <id> <markdown>      # write context (any task)
+ae show <id>                             # read body (plain text)
+ae task:set-body <id> <markdown>         # write body (leaf only)
+ae context <id>                          # read composed context (plain text)
+ae task:set-context <id> <markdown>      # write context (any task)
 ae task:list parent=<id>                 # list immediate children
 ae task:split <id>                       # split leaf on `---`
 ae task:unsplit <id>                     # undo split (rare)
@@ -303,5 +303,6 @@ ae task:unafter <id> <pred>              # remove dependency edge
 ae task:record <id> <text>               # append an agent note
 ```
 
-Task commands return a JSON envelope `{"ok": bool, "data": ..., "error": ...}`.
+Write commands (`task:*`) return a JSON envelope `{"ok": bool, "data": ..., "error": ...}`.
 Check `ok` before continuing; surface errors to the user.
+`ae show` and `ae context` return plain text directly.

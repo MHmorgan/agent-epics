@@ -8,20 +8,18 @@ import (
 	"github.com/MHmorgan/agent-epics/epic"
 )
 
-// registerTaskReadCommands registers task:get, task:list, task:context:get,
-// task:records, task:next.
+// registerTaskReadCommands registers task, task:list, task:records, task:next.
 func registerTaskReadCommands(ctx context.Context) {
-	registerTaskGetCmd(ctx)
+	registerTaskCmd(ctx)
 	registerTaskListCmd(ctx)
-	registerTaskContextGetCmd(ctx)
 	registerTaskRecordsCmd(ctx)
 	registerTaskNextCmd(ctx)
 }
 
-func registerTaskGetCmd(ctx context.Context) {
+func registerTaskCmd(ctx context.Context) {
 	cfg := common.GetConfig(ctx)
 	var rawID string
-	cmd := app.SubCommand("task:get", "Get a task")
+	cmd := app.SubCommand("task", "Get a task")
 	cmd.StringArg(&rawID, "id", "Task ID")
 	cmd.Run(func() error {
 		taskID, err := epic.ParseTaskID(rawID)
@@ -73,31 +71,6 @@ func registerTaskListCmd(ctx context.Context) {
 			return jsonError(err)
 		}
 		fmt.Println(jsonSuccess(tasks))
-		return nil
-	})
-}
-
-func registerTaskContextGetCmd(ctx context.Context) {
-	cfg := common.GetConfig(ctx)
-	var rawID string
-	cmd := app.SubCommand("task:context:get", "Get composed context")
-	cmd.StringArg(&rawID, "id", "Task ID")
-	cmd.Run(func() error {
-		taskID, err := epic.ParseTaskID(rawID)
-		if err != nil {
-			return jsonError(err)
-		}
-		conn, q, err := epic.OpenEpic(taskID.Root(), cfg.EpicsDir)
-		if err != nil {
-			return jsonError(err)
-		}
-		defer conn.Close()
-
-		composed, err := epic.ComposeContext(ctx, q, taskID)
-		if err != nil {
-			return jsonError(err)
-		}
-		fmt.Println(jsonSuccess(map[string]string{"context": composed}))
 		return nil
 	})
 }
