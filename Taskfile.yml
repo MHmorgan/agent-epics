@@ -14,6 +14,7 @@ tasks:
     desc: Run all tests
     cmds:
       - go test ./...
+      - nu test/test.nu
 
   install:
     desc: Install locally

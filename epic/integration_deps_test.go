@@ -27,7 +27,7 @@ func TestDependency_CycleRejection(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -68,7 +68,7 @@ func TestDependency_CycleRejection(t *testing.T) {
 		if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 			t.Fatalf("SetTaskBody: %v", err)
 		}
-		if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+		if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 			t.Fatalf("SplitTask: %v", err)
 		}
 
@@ -108,7 +108,7 @@ func TestNext_RespectsDepOrder(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -199,7 +199,7 @@ func TestNext_SkipsBlockedByDeps(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -247,7 +247,7 @@ func TestNext_AbandonmentSatisfiesDeps(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -298,7 +298,7 @@ func TestNext_NoPendingTasks(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 

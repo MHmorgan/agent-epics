@@ -43,7 +43,7 @@ func TestFullEpicLifecycle(t *testing.T) {
 	}
 
 	// 4. Split the root task.
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -131,7 +131,7 @@ func TestEpicWithBlockedTask(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -196,7 +196,7 @@ func TestEpicWithAbandonedTask(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -251,7 +251,7 @@ func TestAddChildToSplitTask(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -316,7 +316,7 @@ func TestBodyFrozenAfterSplit(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 

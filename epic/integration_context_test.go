@@ -35,7 +35,7 @@ func TestContextComposition_AncestorChain(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody root: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask root: %v", err)
 	}
 
@@ -50,7 +50,7 @@ func TestContextComposition_AncestorChain(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, child1, child1Body); err != nil {
 		t.Fatalf("SetTaskBody child1: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, child1); err != nil {
+	if err := SplitTask(ctx, conn, q, child1, true); err != nil {
 		t.Fatalf("SplitTask child1: %v", err)
 	}
 
@@ -117,7 +117,7 @@ func TestContextComposition_TerminalSiblingIncluded(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 
@@ -198,7 +198,7 @@ func TestContextComposition_EmptyContextsOmitted(t *testing.T) {
 	if err := SetTaskBody(ctx, conn, q, TaskID(epicID), body); err != nil {
 		t.Fatalf("SetTaskBody: %v", err)
 	}
-	if err := SplitTask(ctx, conn, q, TaskID(epicID)); err != nil {
+	if err := SplitTask(ctx, conn, q, TaskID(epicID), true); err != nil {
 		t.Fatalf("SplitTask: %v", err)
 	}
 

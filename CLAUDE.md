@@ -21,14 +21,3 @@ Claude Instructions
 
 `epic/` - implementation of the core `Epic` and `Task` models
 
-
-## Learnings
-
-You shall maintain a document - @LEARNINGS.md - where you document:
-
-* My preferred way of structuring the project
-* My preferences for Go coding
-* My preferences in software architecture
-* Any other stuff I correct you on, which impacts design decisions and produced code
-
-You shall continuously update this document when working on this project.
