@@ -117,12 +117,12 @@ you> /epic-work oidc-auth:2:1
 ### Inspecting an epic by hand
 
 ```
-ae epics                       # list all epics with their derived status
-ae show oidc-auth:2            # body as plain text
-ae context oidc-auth:2:1       # composed context: epic → parent → siblings → self
-ae task:records oidc-auth      # full subtree journal (agent + system records)
-ae task:records oidc-auth:2 --self  # only records attached to this exact task
-ae task:next oidc-auth         # what would `epic-work` pick up next?
+ae epics                         # list all epics with their derived status
+ae show oidc-auth:2              # body as plain text
+ae context oidc-auth:2:1         # composed context: epic → parent → siblings → self
+ae task:records oidc-auth        # full subtree journal (agent + system records)
+ae task:records oidc-auth:2 self # only records attached to this exact task
+ae task:next oidc-auth           # what would `epic-work` pick up next?
 ```
 
 ### Cleaning up
@@ -169,5 +169,4 @@ Remove every epic whose derived status is terminal (all leaves `done` or
 
 ```
 ae help
-ae <command> --help
 ```
